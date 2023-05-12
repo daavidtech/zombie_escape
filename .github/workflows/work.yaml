@@ -33,13 +33,13 @@ jobs:
       #   with:
       #     name: react-github-actions-build
       #     path: build
-      - name: Upload files via SFTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      - name: Upload Files
+        id: upload
+        uses: Creepios/sftp-action@v1.0.3
         with:
-          server: ${{ secrets.REMOTE_HOST }}
-          username: ${{ secrets.REMOTE_USER }}
-          password: ${{ secrets.SSH_PRIVATE_KEY }}
+          host: ${{ secrets.REMOTE_HOST }}
           port: 22
-          serverDir: ${{ secrets.REMOTE_PATH }}
-          localDir: ./build
-          args: -r -v --exclude ".git/**"
+          username: ${{ secrets.REMOTE_USER }}
+          privateKey: ${{ secrets.SSH_PRIVATE_KEY }}
+          localPath: ./build
+          remotePath: ${{ secrets.REMOTE_PATH }}

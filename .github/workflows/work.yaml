@@ -33,13 +33,24 @@ jobs:
       #   with:
       #     name: react-github-actions-build
       #     path: build
-      - name: Upload Files
-        id: upload
-        uses: wangyucode/sftp-upload-action@v2.0.2
+      - name: Deploy files to server
+        uses: SamKirkland/web-deploy@v1
         with:
-          host: ${{ secrets.REMOTE_HOST }}
+          target-server: ${{ secrets.REMOTE_HOST }}
+          remote-user: ${{ secrets.REMOTE_USER }}
+          private-ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
-          username: ${{ secrets.REMOTE_USER }}
-          privateKey: ${{ secrets.SSH_PRIVATE_KEY }}
-          localPath: './build'
-          remotePath: ${{ secrets.REMOTE_PATH }}
+          destination-path: ${{ secrets.REMOTE_PATH }}
+          sync-options: --include 'build/*'
+          # localDir: ./build
+          #args: -r -v --exclude ".git/**"
+      # - name: Upload Files
+      #   id: upload
+      #   uses: Creepios/sftp-action@v1.0.3
+      #   with:
+      #     host: ${{ secrets.REMOTE_HOST }}
+      #     port: 22
+      #     username: ${{ secrets.REMOTE_USER }}
+      #     password: ${{ secrets.SSH_PRIVATE_KEY }}
+      #     localPath: ./build
+      #     remotePath: ${{ secrets.REMOTE_PATH }}

@@ -41,7 +41,7 @@ jobs:
           private-ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           destination-path: ${{ secrets.REMOTE_PATH }}
-          sync-options: --include 'build/*'
+          rsync-options: --include 'build/*'
           # localDir: ./build
           #args: -r -v --exclude ".git/**"
       # - name: Upload Files

@@ -46,9 +46,9 @@ jobs:
           #args: -r -v --exclude ".git/**"
       - name: Copy files to remote server
         run: |
-        ssh-keyscan ${{ secrets.REMOTE_HOST }} >> ~/.ssh/known_hosts
-        ssh -i ${{ secrets.SSH_PRIVATE_KEY }} ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "mkdir -p ${{ secrets.REMOTE_PATH }}"
-        scp -i ${{ secrets.SSH_PRIVATE_KEY }} -r ./build ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:${{ secrets.REMOTE_PATH }}
+          ssh-keyscan ${{ secrets.REMOTE_HOST }} >> ~/.ssh/known_hosts
+          ssh -i ${{ secrets.SSH_PRIVATE_KEY }} ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "mkdir -p ${{ secrets.REMOTE_PATH }}"
+          scp -i ${{ secrets.SSH_PRIVATE_KEY }} -r ./build ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:${{ secrets.REMOTE_PATH }}
       # - name: Upload Files
       #   id: upload
       #   uses: Creepios/sftp-action@v1.0.3

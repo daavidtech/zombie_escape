@@ -3,9 +3,6 @@ name: Build and deploy
 on:
   push:
     branches: [ "main" ]
-#   pull_request:
-#     branches: [ "trunk" ]
-
 env:
   CARGO_TERM_COLOR: always
 
@@ -21,29 +18,8 @@ jobs:
           node-version: 16.x
       - name: Install dependencies
         run: npm install    
-      # - name: Test
-      #   run: npm test
-      #   env:
-      #     CI: true
       - name: Generate build
         run: npm run build
-      # Share artifact inside workflow
-      # - name: Share artifact inside workflow
-      #   uses: actions/upload-artifact@v1
-      #   with:
-      #     name: react-github-actions-build
-      #     path: build
-      # - name: Deploy files to server
-      #   uses: SamKirkland/web-deploy@v1
-      #   with:
-      #     target-server: ${{ secrets.REMOTE_HOST }}
-      #     remote-user: ${{ secrets.REMOTE_USER }}
-      #     private-ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
-      #     port: 22
-      #     destination-path: ${{ secrets.REMOTE_PATH }}
-      #     source-path: ./build
-          # localDir: ./build
-          #args: -r -v --exclude ".git/**"
       - name: Install SSH Key
         uses: shimataro/ssh-key-action@v2
         with:
@@ -53,18 +29,3 @@ jobs:
         run: ssh-keyscan -H ${{ secrets.REMOTE_HOST }} >> ~/.ssh/known_hosts
       - name: Deploy with rsync
         run: rsync -avz ./build ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:${{ secrets.REMOTE_PATH }}
-      # - name: Copy files to remote server
-      #   run: |
-      #     ssh -i ${{ secrets.SSH_PRIVATE_KEY }} ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "mkdir -p ${{ secrets.REMOTE_PATH }}"
-      #     scp -i ${{ secrets.SSH_PRIVATE_KEY }} -r ./build ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:${{ secrets.REMOTE_PATH }}
-      # - name: Upload Files
-      #   id: upload
-      #   uses: Creepios/sftp-action@v1.0.3
-      #   with:
-      #     host: ${{ secrets.REMOTE_HOST }}
-      #     port: 22
-      #     username: ${{ secrets.REMOTE_USER }}
-      #     password: ${{ secrets.SSH_PRIVATE_KEY }}
-      #     localPath: ./build
-      #     remotePath: ${{ secrets.REMOTE_PATH }}
-      

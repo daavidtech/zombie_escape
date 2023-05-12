@@ -38,7 +38,7 @@ jobs:
         with:
           target-server: ${{ secrets.REMOTE_HOST }}
           remote-user: ${{ secrets.REMOTE_USER }}
-          private-ssh-key: qwert
+          private-ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           destination-path: ${{ secrets.REMOTE_PATH }}
           source-path: ./build

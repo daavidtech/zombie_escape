@@ -36,10 +36,10 @@ jobs:
       - name: Upload files via SFTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
-          server: $REMOTE_HOST
-          username: $REMOTE_USER
+          server: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
           password: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
-          serverDir: $REMOTE_PATH
+          serverDir: ${{ secrets.REMOTE_PATH }}
           localDir: ./build
           args: -r -v --exclude ".git/**"

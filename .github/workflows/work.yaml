@@ -44,10 +44,19 @@ jobs:
       #     source-path: ./build
           # localDir: ./build
           #args: -r -v --exclude ".git/**"
-      - name: Copy files to remote server
-        run: |
-          ssh -i ${{ secrets.SSH_PRIVATE_KEY }} ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "mkdir -p ${{ secrets.REMOTE_PATH }}"
-          scp -i ${{ secrets.SSH_PRIVATE_KEY }} -r ./build ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:${{ secrets.REMOTE_PATH }}
+      - name: Install SSH Key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: {%- raw -%} ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: 'just-a-placeholder-so-we-dont-get-errors'
+      - name: Adding Known Hosts
+        run: ssh-keyscan -H ${{ secrets.REMOTE_HOST }}{% endraw%} >> ~/.ssh/known_hosts
+      - name: Deploy with rsync
+        run: rsync -avz ./build ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:${{ secrets.REMOTE_PATH }}
+      # - name: Copy files to remote server
+      #   run: |
+      #     ssh -i ${{ secrets.SSH_PRIVATE_KEY }} ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "mkdir -p ${{ secrets.REMOTE_PATH }}"
+      #     scp -i ${{ secrets.SSH_PRIVATE_KEY }} -r ./build ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:${{ secrets.REMOTE_PATH }}
       # - name: Upload Files
       #   id: upload
       #   uses: Creepios/sftp-action@v1.0.3

@@ -1,8 +1,9 @@
-import React, { useRef, useState } from 'react';
+import React, { Suspense, useRef, useState } from 'react';
 // import logo from './logo.svg';
 import './App.css';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei'
+import { Physics, RigidBody } from '@react-three/rapier';
 
 function Box(props: any) {
   // This reference gives us direct access to the THREE.Mesh object
@@ -30,11 +31,18 @@ function Box(props: any) {
 function App() {
   return (
     <Canvas>
+      <Suspense>
+        <Physics debug>
+          <RigidBody colliders={"hull"} restitution={2}>
+            <Box position={[-1.2, 0, 0]} />
+          </RigidBody>
+          <Box position={[1.5, 0, 0]} />
+        </Physics>
+      </Suspense>
       <ambientLight intensity={0.5} />
       <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} />
       <pointLight position={[-10, -10, -10]} />
-      <Box position={[-1.2, 0, 0]} />
-      <Box position={[1.5, 0, 0]} />
+
       <OrbitControls />
     </Canvas>
   );

@@ -1,7 +1,7 @@
-import React, { useEffect } from "react";
-import { useFrame, useLoader } from "@react-three/fiber";
+import React from "react";
+import { useLoader } from "@react-three/fiber";
 import { MeshReflectorMaterial } from "@react-three/drei";
-import { RepeatWrapping, TextureLoader } from "three";
+import { TextureLoader } from "three";
 
 export function Ground() {
   // thanks to https://polyhaven.com/a/rough_plasterbrick_05 !

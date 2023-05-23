@@ -1,22 +1,81 @@
 import React, { Suspense, useRef, useState } from 'react';
 // import logo from './logo.svg';
 import './App.css';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber';
 
 import { Physics, RigidBody } from '@react-three/rapier';
 import { Ground } from './Ground';
 import { Vector3 } from 'three';
 import { OrbitControls } from '@react-three/drei';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
 
 
 
+
+
+function Gun() {
+  const gltf = useLoader(GLTFLoader, '/heavy_assault_rifle/scene.gltf');
+
+  return (
+    <primitive object={gltf.scene}  />
+    
+  );
+}
 
 
 function Game(props: any) {
   const ref = useRef<any>()
   const { camera } = useThree();
   const [movement, setMovement] = useState({ forward: false, backward: false, left: false, right: false });
+  const [mouseDown, setMouseDown] = useState(false);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  
+  const handleMouseDown = () => {
+    setMouseDown(true);
+  };
+
+  const handleMouseUp = () => {
+    setMouseDown(false);
+  };
+
+  const handleMouseMove = (event: { clientX: number; clientY: number }) => {
+    const { clientX, clientY } = event;
+    setMousePosition({ x: clientX, y: clientY });
+  };
+
+  React.useEffect(() => {
+    window.addEventListener('mousedown', handleMouseDown);
+    window.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => {
+      window.removeEventListener('mousedown', handleMouseDown);
+      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('mousemove', handleMouseMove);
+    };
+  }, []);
+
+  useFrame((state, delta) => {
+    const { x: mouseX, y: mouseY } = mousePosition;
+    const movementSpeed = 0.008;
+
+    if (mouseDown) {
+      const deltaX = mouseX - window.innerWidth / 2;
+      const deltaY = mouseY - window.innerHeight / 2;
+
+      
+      ref.current.rotation.x -= deltaY * movementSpeed * delta;
+      ref.current.rotation.y -= deltaX * movementSpeed * delta;
+      
+      
+    }
+
+    const cameraOffset = new Vector3(0, 0, 2);
+    const movementVector = new Vector3(0, 0, 0);
+    const newPosition = ref.current.position.clone().add(cameraOffset).add(movementVector);
+    camera.position.copy(newPosition);
+    camera.lookAt(ref.current.position);
+  });
 
   useFrame((state, delta) => {
     const { forward, backward, left, right } = movement;
@@ -29,23 +88,28 @@ function Game(props: any) {
     const moveX = (right ? 1 : 0) - (left ? 1 : 0);
     const moveY = (forward ? 1 : 0) - (backward ? 1 : 0);
     
-   
-    ref.current.rotation.y += moveX * distance;
-    ref.current.position.x += moveY * distance;
+    
+    ref.current.position.x += moveX * distance;
+    ref.current.position.z += moveY * distance;
 
-    const cameraOffset = new Vector3(0, 2, 5);
-    const movementVector = new Vector3(0, 0, 0);
+    const cameraOffset = new Vector3(0, 0, 0);
+    const movementVector = new Vector3(-0.2, 0.3, 0.2);
     const newPosition = ref.current.position
+    
+    
       .clone()
       .add(cameraOffset)
       .add(movementVector);
     camera.position.copy(newPosition);
+    
     camera.lookAt(ref.current.position);
+    camera.rotation.copy(ref.current.rotation);
   });
+  
 
   const handleKeyDown = (event: { key: string; }) => {
     if (event.key === 'w' || event.key === 'ArrowUp') {
-      setMovement((prevState) => ({ ...prevState, forward: true }));
+      setMovement((prevState) => ({ ...prevState, forswward: true }));
     } else if (event.key === 's' || event.key === 'ArrowDown') {
       setMovement((prevState) => ({ ...prevState, backward: true }));
     } else if (event.key === 'a' || event.key === 'ArrowLeft') {
@@ -83,12 +147,14 @@ function Game(props: any) {
        
        
 
-      <boxGeometry args={[1, 1, 1]}  />
+       <Gun />
       <meshStandardMaterial color={"orange"} />
     </mesh>
 );
   
 }
+
+
 
 
 
@@ -120,9 +186,9 @@ function App(props: any) {
           
           
           </RigidBody>
-          <Game/>
+          <Game  />
           <Lights/>
-          <Ground />
+          <Ground  />
          
           
         

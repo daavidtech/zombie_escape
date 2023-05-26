@@ -5,7 +5,7 @@ import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber';
 
 import { Physics, RigidBody } from '@react-three/rapier';
 import { Ground } from './Ground';
-import { Euler, Mesh, Vector3 } from 'three';
+import { Euler, Mesh } from 'three';
 import { OrbitControls } from '@react-three/drei';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
@@ -22,8 +22,8 @@ function Gun() {
 function Game(props: any) {
 	const ref = useRef<Mesh>()
 	const { camera } = useThree();
-	const [movement, setMovement] = useState({ forward: false, backward: false, left: false, right: false });
-	const [mouseDown, setMouseDown] = useState(false);
+	const [, setMovement] = useState({ forward: false, backward: false, left: false, right: false });
+	const [, setMouseDown] = useState(false);
 	const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
 	const handleMouseDown = () => {

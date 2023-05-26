@@ -13,13 +13,15 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
 
 
+let yaw: any
+let pitch: any
+
 
 function Gun() {
   const gltf = useLoader(GLTFLoader, '/heavy_assault_rifle/scene.gltf');
 
   return (
     <primitive object={gltf.scene}  />
-    
   );
 }
 
@@ -30,7 +32,9 @@ function Game(props: any) {
   const [movement, setMovement] = useState({ forward: false, backward: false, left: false, right: false });
   const [mouseDown, setMouseDown] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  
+  const [prevMousePosition, setPrevMousePosition] = useState({ x: 0, y: 0 });
+  const [mouseSpeed, setMouseSpeed] = useState({ x: 0, y: 0 });
+
   const handleMouseDown = () => {
     setMouseDown(true);
   };
@@ -42,6 +46,7 @@ function Game(props: any) {
   const handleMouseMove = (event: { clientX: number; clientY: number }) => {
     const { clientX, clientY } = event;
     setMousePosition({ x: clientX, y: clientY });
+    
   };
 
   React.useEffect(() => {
@@ -57,20 +62,54 @@ function Game(props: any) {
 
   useFrame((state, delta) => {
     const { x: mouseX, y: mouseY } = mousePosition;
-    const movementSpeed = 0.008;
+    const { x: prevMouseX, y: prevMouseY } = prevMousePosition;
+    const sensitivity = 0.01;
+    
 
     if (mouseDown) {
-      const deltaX = mouseX - window.innerWidth / 2;
-      const deltaY = mouseY - window.innerHeight / 2;
+      
+      const deltaY = mouseX - prevMouseX;
+      const deltaX = mouseY - prevMouseY;
+      
+
+      let yaw = deltaY * sensitivity;
+      let Pitch = deltaX * sensitivity;
+	  
+      if (yaw < 0.0) {
+        ref.current.rotation.y -= yaw
+      } else {
+        ref.current.rotation.y -= yaw
+      }
+
+      console.log(ref.current.rotation.y)
+
+      if (Pitch < 0.0) {
+        ref.current.rotation.x -= Pitch
+      } else {
+        ref.current.rotation.x -= Pitch
+      }
+      
+      
+
 
       
-      ref.current.rotation.x -= deltaY * movementSpeed * delta;
-      ref.current.rotation.y -= deltaX * movementSpeed * delta;
       
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      setPrevMousePosition({ x: mouseX, y: mouseY });
+
+
       
     }
 
-    const cameraOffset = new Vector3(0, 0, 2);
+    const cameraOffset = new Vector3(0, 0, 0);
     const movementVector = new Vector3(0, 0, 0);
     const newPosition = ref.current.position.clone().add(cameraOffset).add(movementVector);
     camera.position.copy(newPosition);
@@ -89,11 +128,12 @@ function Game(props: any) {
     const moveY = (forward ? 1 : 0) - (backward ? 1 : 0);
     
     
+    
     ref.current.position.x += moveX * distance;
     ref.current.position.z += moveY * distance;
 
     const cameraOffset = new Vector3(0, 0, 0);
-    const movementVector = new Vector3(-0.2, 0.3, 0.2);
+    const movementVector = new Vector3(0.0, 0.0, 0.0);
     const newPosition = ref.current.position
     
     
@@ -109,7 +149,7 @@ function Game(props: any) {
 
   const handleKeyDown = (event: { key: string; }) => {
     if (event.key === 'w' || event.key === 'ArrowUp') {
-      setMovement((prevState) => ({ ...prevState, forswward: true }));
+      setMovement((prevState) => ({ ...prevState, forward: true }));
     } else if (event.key === 's' || event.key === 'ArrowDown') {
       setMovement((prevState) => ({ ...prevState, backward: true }));
     } else if (event.key === 'a' || event.key === 'ArrowLeft') {

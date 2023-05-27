@@ -5,7 +5,7 @@ import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber';
 import { Physics, RigidBody } from '@react-three/rapier';
 import { Ground } from './Ground';
 import { Euler, Vector3 } from 'three';
-import { PointerLockControls } from '@react-three/drei';
+import { PointerLockControls, Stats } from '@react-three/drei';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
 
@@ -218,6 +218,7 @@ function App(props: any) {
 						setInputLocked(false)
 					}}
 				/>
+				<Stats />
 			</Canvas>
 		</Suspense>
 	);

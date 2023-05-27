@@ -271,7 +271,7 @@ function Game(props: any) {
 		<mesh
 			{...props}
 			ref={ref}>
-			
+			<PointerLockControls />	
 			<Gun />
 			<meshStandardMaterial color={"orange"} />
 		</mesh>

@@ -34,7 +34,7 @@ function Game(props: {
 	const ref = useRef<any>()
 	const camera = useThree(state => state.camera);
 	const [movement, setMovement] = useState({ forward: false, backward: false, left: false, right: false });
-	const [mouseDown, setMouseDown] = useState(false);
+	const [, setMouseDown] = useState(false);
 	const mouseDelta = useRef<{
 		x: number,
 		y: number

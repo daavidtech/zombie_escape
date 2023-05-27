@@ -6,8 +6,9 @@ import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber';
 import { Physics, RigidBody } from '@react-three/rapier';
 import { Ground } from './Ground';
 import { Euler, Mesh, Vector3 } from 'three';
-import { OrbitControls } from '@react-three/drei';
+import { OrbitControls, PointerLockControls } from '@react-three/drei';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+
 
 function Gun() {
 	const gltf = useLoader(GLTFLoader, '/heavy_assault_rifle/scene.gltf');
@@ -18,6 +19,19 @@ function Gun() {
 	);
 }
 
+function rotateVec(x: number, y: number, theta: number): [number, number] {
+	const cosTheta = Math.cos(theta);
+	const sinTheta = Math.sin(theta);
+  
+	const newX = cosTheta * x - sinTheta * y;
+	const newY = sinTheta * x + cosTheta * y;
+  
+	return [newX, newY];
+  }
+
+  
+
+  
 
 function Game(props: any) {
 	const ref = useRef<Mesh>()
@@ -30,9 +44,13 @@ function Game(props: any) {
 		setMouseDown(true);
 	};
 
+
 	const handleMouseUp = () => {
 		setMouseDown(false);
 	};
+
+
+	
 
 	const handleMouseMove = (event: { clientX: number; clientY: number }) => {
 		const { clientX, clientY } = event;
@@ -167,59 +185,74 @@ function Game(props: any) {
 		// camera.rotation.x = playerRotation.current.pitch
 	});
 
-	//   useFrame((state, delta) => {
-	// 	const { forward, backward, left, right } = movement;
+	  useFrame((state, delta) => {
+		const { forward, backward, left, right } = movement;
 
 
-	// 	const movementSpeed = 3;
-	// 	const distance = movementSpeed * delta;
+		const movementSpeed = 3;
+		const distance = movementSpeed * delta;
 
 
-	// 	const moveX = (right ? 1 : 0) - (left ? 1 : 0);
-	// 	const moveY = (forward ? 1 : 0) - (backward ? 1 : 0);
+		const moveX = (right ? 1 : 0) - (left ? 1 : 0);
+		const moveY = (forward ? 1 : 0) - (backward ? 1 : 0);
 
-	// 	if (!ref.current) {
-	// 	  return
-	// 	}
+		if (!ref.current) {
+		  return
+		}
 
-	// 	ref.current.position.x += moveX * distance;
-	// 	ref.current.position.z += moveY * distance;
+		const newRot = rotateVec(
+			moveX, 
+			moveY, 
+			playerRotation.current.yaw
+		);
 
-	// 	// const cameraOffset = new Vector3(0, 0, 0);
-	// 	// const movementVector = new Vector3(-0.2, 0.3, 0.2);
-	// 	// const newPosition = ref.current.position
+		console.log(newRot[0])
+  
+		ref.current.position.x += newRot[1] * distance;
+		ref.current.position.z += newRot[0] * distance;
+
+		const cameraOffset = new Vector3(0, 0, 0);
+		
+		const newPosition = ref.current.position
 
 
-	// 	//   .clone()
-	// 	// //   .add(cameraOffset)
-	// 	// //   .add(movementVector);
-	// 	// camera.position.copy(newPosition);
+		  .clone()
+		  .add(cameraOffset)
+		  
+		camera.position.copy(newPosition);
 
-	// 	// camera.lookAt(ref.current.position);
-	// 	// camera.rotation.copy(ref.current.rotation);
-	//   });
+		camera.lookAt(ref.current.position);
+		camera.rotation.copy(ref.current.rotation);
+	  });
+
+	
+
+
+
+
 
 
 	const handleKeyDown = (event: { key: string; }) => {
-		if (event.key === 'w' || event.key === 'ArrowUp') {
-			setMovement((prevState) => ({ ...prevState, forswward: true }));
-		} else if (event.key === 's' || event.key === 'ArrowDown') {
+		if (event.key === 'd' || event.key === 'ArrowUp') {
+			setMovement((prevState) => ({ ...prevState, forward: true }));
+		} else if (event.key === 'a' || event.key === 'ArrowDown') {
 			setMovement((prevState) => ({ ...prevState, backward: true }));
-		} else if (event.key === 'a' || event.key === 'ArrowLeft') {
+		} else if (event.key === 'w' || event.key === 'ArrowLeft') {
 			setMovement((prevState) => ({ ...prevState, left: true }));
-		} else if (event.key === 'd' || event.key === 'ArrowRight') {
+		} else if (event.key === 's' || event.key === 'ArrowRight') {
 			setMovement((prevState) => ({ ...prevState, right: true }));
 		}
 	};
+	
 
 	const handleKeyUp = (event: { key: string; }) => {
-		if (event.key === 'w' || event.key === 'ArrowUp') {
+		if (event.key === 'd' || event.key === 'ArrowUp') {
 			setMovement((prevState) => ({ ...prevState, forward: false }));
-		} else if (event.key === 's' || event.key === 'ArrowDown') {
+		} else if (event.key === 'a' || event.key === 'ArrowDown') {
 			setMovement((prevState) => ({ ...prevState, backward: false }));
-		} else if (event.key === 'a' || event.key === 'ArrowLeft') {
+		} else if (event.key === 'w' || event.key === 'ArrowLeft') {
 			setMovement((prevState) => ({ ...prevState, left: false }));
-		} else if (event.key === 'd' || event.key === 'ArrowRight') {
+		} else if (event.key === 's' || event.key === 'ArrowRight') {
 			setMovement((prevState) => ({ ...prevState, right: false }));
 		}
 	};
@@ -227,6 +260,7 @@ function Game(props: any) {
 	React.useEffect(() => {
 		window.addEventListener('keydown', handleKeyDown);
 		window.addEventListener('keyup', handleKeyUp);
+		
 		return () => {
 			window.removeEventListener('keydown', handleKeyDown);
 			window.removeEventListener('keyup', handleKeyUp);
@@ -237,6 +271,7 @@ function Game(props: any) {
 		<mesh
 			{...props}
 			ref={ref}>
+			
 			<Gun />
 			<meshStandardMaterial color={"orange"} />
 		</mesh>
@@ -253,6 +288,7 @@ function Lights() {
 	return (
 		<>
 			<ambientLight intensity={1.5} />
+			
 			<spotLight position={[119, 10, 10]} angle={0.15} penumbra={1} />
 		</>
 	)
@@ -264,6 +300,8 @@ function App(props: any) {
 	return (
 		<Suspense fallback={null}>
 			<Canvas>
+			
+			
 				<Physics debug>
 					<RigidBody colliders={"hull"} restitution={2}>
 					</RigidBody>
@@ -271,7 +309,7 @@ function App(props: any) {
 					<Lights />
 					<Ground />
 				</Physics>
-				<OrbitControls />
+				
 			</Canvas>
 		</Suspense>
 	);

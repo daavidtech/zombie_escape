@@ -1,12 +1,11 @@
 import React, { Suspense, useRef, useState } from 'react';
-// import logo from './logo.svg';
 import './App.css';
 import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber';
 
 import { Physics, RigidBody } from '@react-three/rapier';
 import { Ground } from './Ground';
-import { Euler, Mesh, Vector3 } from 'three';
-import { OrbitControls, PointerLockControls } from '@react-three/drei';
+import { Euler, Vector3 } from 'three';
+import { PointerLockControls } from '@react-three/drei';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
 
@@ -27,18 +26,22 @@ function rotateVec(x: number, y: number, theta: number): [number, number] {
 	const newY = sinTheta * x + cosTheta * y;
   
 	return [newX, newY];
-  }
+} 
 
-  
-
-  
-
-function Game(props: any) {
-	const ref = useRef<Mesh>()
-	const { camera } = useThree();
+function Game(props: {
+	inputLocked: boolean
+}) {
+	const ref = useRef<any>()
+	const camera = useThree(state => state.camera);
 	const [movement, setMovement] = useState({ forward: false, backward: false, left: false, right: false });
 	const [mouseDown, setMouseDown] = useState(false);
-	const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+	const mouseDelta = useRef<{
+		x: number,
+		y: number
+	}>({
+		x: 0,
+		y: 0
+	})
 
 	const handleMouseDown = () => {
 		setMouseDown(true);
@@ -49,12 +52,9 @@ function Game(props: any) {
 		setMouseDown(false);
 	};
 
-
-	
-
-	const handleMouseMove = (event: { clientX: number; clientY: number }) => {
-		const { clientX, clientY } = event;
-		setMousePosition({ x: clientX, y: clientY });
+	const handleMouseMove = (event: { movementX: number; movementY: number }) => {
+		mouseDelta.current.x = event.movementX
+		mouseDelta.current.y = event.movementY
 	};
 
 	React.useEffect(() => {
@@ -68,14 +68,6 @@ function Game(props: any) {
 		};
 	}, []);
 
-	const lastMousePosition = useRef<{
-		x: number
-		y: number
-	}>({
-		x: 0,
-		y: 0
-	})
-
 	const playerRotation = useRef<{
 		yaw: number
 		pitch: number
@@ -87,102 +79,28 @@ function Game(props: any) {
 	})
 
 	useFrame((state, delta) => {
-		// playerRotation.current.yaw += 0.005
+		if (!props.inputLocked) {
+			return
+		}
 
-		// if (playerRotation.current.rota === 1) {
-		// 	playerRotation.current.pitch += 0.005
+		if (mouseDelta.current.x) {
+			playerRotation.current.yaw += -mouseDelta.current.x * 0.01
+			mouseDelta.current.x = 0
+		}
 
-		// 	if (playerRotation.current.pitch > 0.7) {
-		// 		playerRotation.current.rota = 0
-		// 	}
-		// } else {
-		// 	playerRotation.current.pitch -= 0.005
-
-		// 	if (playerRotation.current.pitch < -0.8) {
-		// 		playerRotation.current.rota = 1
-		// 	}
-		// }
-
-		const { x: mouseX, y: mouseY } = mousePosition;
-
-		const deltaX = mouseX - lastMousePosition.current.x
-		const deltaY = mouseY - lastMousePosition.current.y
-
-		lastMousePosition.current.x = mouseX
-		lastMousePosition.current.y = mouseY
-
-		playerRotation.current.yaw += -deltaX * 0.01
-		playerRotation.current.pitch += -deltaY * 0.01
-
-
-		// window.
-
-		// 
-		// const movementSpeed = 0.008;
+		if (mouseDelta.current.y) {
+			playerRotation.current.pitch += -mouseDelta.current.y * 0.01
+			mouseDelta.current.y = 0
+		}
 
 		if (!ref.current) {
 			return
 		}
 
-		// // if (mouseDown) {
-		// const deltaX = mouseX - window.innerWidth / 2;
-		// const deltaY = mouseY - window.innerHeight / 2;
-
-		// console.log("mouse delta", deltaX, deltaY)
-
-		// const lookDirection = new Vector3()
-
-		// ref.current.getWorldDirection(lookDirection)
-
-		// lookDirection.x += deltaX * movementSpeed * delta
-		// lookDirection.y += deltaY * movementSpeed * delta
-
-		// ref.current.lookAt(lookDirection)
-
-		// const rotDirection = new Vector3(1, 1, 0)
-
-		// ref.current.rotateOnAxis(rotDirection, 0.005)
-
 		const rot = new Euler(playerRotation.current.pitch, playerRotation.current.yaw, 0, "YXZ")
 
 		ref.current.setRotationFromEuler(rot)
 		camera.setRotationFromEuler(rot)
-
-		// outerRef.current.rotateY(0.005)
-		// outerRef.current.rotateX(0.005)
-
-		// console.log("looking at", lookDirection)
-
-		// ref.current.rotateY(-deltaX * movementSpeed * delta)
-		// ref.current.rotateX(-deltaY * movementSpeed * delta)
-
-
-		//   ref.current.rotation.x -= deltaY * movementSpeed * delta;
-		//   ref.current.rotation.y -= deltaX * movementSpeed * delta;
-
-
-		//}
-
-		// const cameraOffset = new Vector3(0, 0, 2);
-		// const movementVector = new Vector3(0, 0, 0);
-		// const newPosition = ref.current.position.clone().add(cameraOffset).add(movementVector);
-		// camera.position.copy(newPosition);
-		// camera.lookAt(ref.current.position);
-
-		//camera.position.copy(outerRef.current.position)
-
-		// const rot = new Vector3()
-		// rot.copy(outerRef.current.rotation)
-
-		// const rot = outerRef.current.rotation.clone()
-		// rot.x = innerRef.current.rotation.x
-
-		// camera.rotation.copy(rot)
-
-		//camera.rotation.copy(innerRef.current.rotation)
-
-		// camera.rotation.y = playerRotation.current.yaw
-		// camera.rotation.x = playerRotation.current.pitch
 	});
 
 	  useFrame((state, delta) => {
@@ -205,8 +123,6 @@ function Game(props: any) {
 			moveY, 
 			playerRotation.current.yaw
 		);
-
-		console.log(newRot[0])
   
 		ref.current.position.x += newRot[1] * distance;
 		ref.current.position.z += newRot[0] * distance;
@@ -223,14 +139,7 @@ function Game(props: any) {
 
 		camera.lookAt(ref.current.position);
 		camera.rotation.copy(ref.current.rotation);
-	  });
-
-	
-
-
-
-
-
+	});
 
 	const handleKeyDown = (event: { key: string; }) => {
 		if (event.key === 'd' || event.key === 'ArrowUp') {
@@ -268,9 +177,7 @@ function Game(props: any) {
 	}, []);
 
 	return (
-		<mesh
-			{...props}
-			ref={ref}>
+		<mesh ref={ref}>
 			<PointerLockControls />	
 			<Gun />
 			<meshStandardMaterial color={"orange"} />
@@ -279,37 +186,38 @@ function Game(props: any) {
 
 }
 
-
-
-
-
-
 function Lights() {
 	return (
 		<>
 			<ambientLight intensity={1.5} />
-			
 			<spotLight position={[119, 10, 10]} angle={0.15} penumbra={1} />
 		</>
 	)
 }
 
-
-
 function App(props: any) {
+	const [inputLocked, setInputLocked] = useState(false)
+
 	return (
 		<Suspense fallback={null}>
-			<Canvas>
-			
-			
+			<Canvas>			
 				<Physics debug>
 					<RigidBody colliders={"hull"} restitution={2}>
 					</RigidBody>
-					<Game />
+					<Game 
+						inputLocked={inputLocked}
+					/>
 					<Lights />
 					<Ground />
 				</Physics>
-				
+				<PointerLockControls
+					onLock={() => {
+						setInputLocked(true)
+					}}
+					onUnlock={() => {
+						setInputLocked(false)
+					}}
+				/>
 			</Canvas>
 		</Suspense>
 	);
